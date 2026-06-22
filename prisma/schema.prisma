@@ -22,6 +22,7 @@ model User {
   passwordHash String   @map("password_hash")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  comments     ProductComment[]
 
   @@map("users")
 }
@@ -53,6 +54,7 @@ model Product {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
   photos           ProductPhoto[]
+  comments         ProductComment[]
 
   @@map("products")
 }
@@ -70,4 +72,19 @@ model ProductPhoto {
 
   @@unique([productId, order])
   @@map("product_photos")
+}
+
+model ProductComment {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  title     String?
+  content   String?
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("product_comments")
 }
