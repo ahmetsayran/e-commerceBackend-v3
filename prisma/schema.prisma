@@ -52,6 +52,22 @@ model Product {
   averageRating    Decimal? @db.Decimal(2, 1) @map("average_rating")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
+  photos           ProductPhoto[]
 
   @@map("products")
+}
+
+model ProductPhoto {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  isPrimary Boolean  @default(false) @map("is_primary")
+  url       String
+  size      Int
+  order     Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([productId, order])
+  @@map("product_photos")
 }
