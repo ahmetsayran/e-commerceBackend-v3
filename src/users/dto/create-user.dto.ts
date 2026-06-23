@@ -10,13 +10,13 @@ export class CreateUserDto {
   lastName: string;
 
   @IsString()
-  @MinLength(3)
+  @MinLength(1)
   username: string;
 
   @IsEmail()
   email: string;
 
   @IsString()
-  @MinLength(8)
+  @MinLength(1)
   password: string;
 }
