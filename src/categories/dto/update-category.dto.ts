@@ -1,14 +1,12 @@
-import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class UpdateCategoryDto {
   @IsOptional()
   @IsString()
-  @MinLength(1)
   name?: string;
 
   @IsOptional()
   @IsString()
-  @MinLength(1)
   slug?: string;
 
   @IsOptional()

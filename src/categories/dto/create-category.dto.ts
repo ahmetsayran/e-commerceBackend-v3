@@ -1,12 +1,10 @@
-import { IsInt, IsString, MinLength } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
-  @MinLength(1)
   name: string;
 
   @IsString()
-  @MinLength(1)
   slug: string;
 
   @IsInt()
