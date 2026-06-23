@@ -74,6 +74,19 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    const uniqueChecks = [
+      ...(dto.username ? [{ username: dto.username }] : []),
+      ...(dto.email ? [{ email: dto.email }] : []),
+    ];
+    if (uniqueChecks.length > 0) {
+      const conflict = await this.prisma.user.findFirst({
+        where: { id: { not: id }, OR: uniqueChecks },
+      });
+      if (conflict) {
+        throw new ConflictException('Username or email already in use');
+      }
+    }
+
     const firstName = dto.firstName ?? user.firstName;
     const lastName = dto.lastName ?? user.lastName;
 
