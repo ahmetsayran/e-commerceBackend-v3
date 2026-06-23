@@ -43,7 +43,7 @@ model RefreshToken {
 model Category {
   id        Int      @id @default(autoincrement())
   name      String
-  slug      String   @unique
+  slug      String
   order     Int
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -57,7 +57,7 @@ model Product {
   categoryId       Int      @map("category_id")
   category         Category @relation(fields: [categoryId], references: [id])
   name             String
-  slug             String   @unique
+  slug             String
   shortDescription String   @map("short_description")
   longDescription  String   @map("long_description")
   price            Decimal  @db.Decimal(10, 2)

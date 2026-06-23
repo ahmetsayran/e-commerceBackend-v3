@@ -11,13 +11,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateCategoryDto) {
-    const existing = await this.prisma.category.findUnique({
-      where: { slug: dto.slug },
-    });
-    if (existing) {
-      throw new ConflictException('Slug already in use');
-    }
+  create(dto: CreateCategoryDto) {
     return this.prisma.category.create({ data: dto });
   }
 
@@ -37,16 +31,6 @@ export class CategoriesService {
 
   async update(id: number, dto: UpdateCategoryDto) {
     const category = await this.findById(id);
-
-    if (dto.slug) {
-      const conflict = await this.prisma.category.findFirst({
-        where: { id: { not: id }, slug: dto.slug },
-      });
-      if (conflict) {
-        throw new ConflictException('Slug already in use');
-      }
-    }
-
     return this.prisma.category.update({
       where: { id: category.id },
       data: dto,
