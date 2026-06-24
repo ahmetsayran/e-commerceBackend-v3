@@ -16,6 +16,7 @@ const PUBLIC_USER_SELECT = {
   fullName: true,
   username: true,
   email: true,
+  role: true,
   createdAt: true,
   updatedAt: true,
 };
