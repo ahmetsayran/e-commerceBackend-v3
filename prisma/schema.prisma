@@ -73,6 +73,7 @@ model Product {
   primaryPhotoUrl  String?  @map("primary_photo_url")
   commentCount     Int      @default(0) @map("comment_count")
   averageRating    Decimal? @db.Decimal(2, 1) @map("average_rating")
+  stockQuantity    Int      @default(0) @map("stock_quantity")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
   photos           ProductPhoto[]
