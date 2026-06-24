@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductPhotoDto } from './dto/create-product-photo.dto';
 
@@ -36,6 +36,41 @@ export class ProductPhotosService {
       }
 
       return photo;
+    });
+  }
+
+  async remove(id: number) {
+    await this.prisma.$transaction(async (tx) => {
+      const photo = await tx.productPhoto.findUnique({ where: { id } });
+      if (!photo) {
+        throw new NotFoundException('Product photo not found');
+      }
+
+      await tx.productPhoto.delete({ where: { id } });
+
+      await tx.productPhoto.updateMany({
+        where: { productId: photo.productId, order: { gt: photo.order } },
+        data: { order: { decrement: 1 } },
+      });
+
+      if (photo.isPrimary) {
+        const nextPrimary = await tx.productPhoto.findFirst({
+          where: { productId: photo.productId },
+          orderBy: { order: 'asc' },
+        });
+
+        await tx.product.update({
+          where: { id: photo.productId },
+          data: { primaryPhotoUrl: nextPrimary?.url ?? null },
+        });
+
+        if (nextPrimary) {
+          await tx.productPhoto.update({
+            where: { id: nextPrimary.id },
+            data: { isPrimary: true },
+          });
+        }
+      }
     });
   }
 }
