@@ -57,8 +57,23 @@ model Order {
   status     OrderStatus @default(PENDING)
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @updatedAt @map("updated_at")
+  items      OrderItem[]
 
   @@map("orders")
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @map("order_id")
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(10, 2) @map("unit_price")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("order_items")
 }
 
 model RefreshToken {
@@ -103,6 +118,7 @@ model Product {
   photos           ProductPhoto[]
   comments         ProductComment[]
   cartItems        CartItem[]
+  orderItems       OrderItem[]
 
   @@map("products")
 }
