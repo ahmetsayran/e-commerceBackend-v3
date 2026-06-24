@@ -48,10 +48,7 @@ export class ProductPhotosService {
       }
 
       if (dto.order !== undefined && dto.order !== photo.order) {
-        const totalCount = await tx.productPhoto.count({
-          where: { productId: photo.productId },
-        });
-        const targetOrder = Math.min(Math.max(dto.order, 1), totalCount);
+        const targetOrder = dto.order;
 
         await tx.productPhoto.update({ where: { id }, data: { order: -1 } });
 
