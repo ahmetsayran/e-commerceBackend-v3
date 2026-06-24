@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { ProductPhotosModule } from './product-photos/product-photos.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ProductPhotosModule } from './product-photos/product-photos.module';
     CategoriesModule,
     ProductsModule,
     ProductPhotosModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
