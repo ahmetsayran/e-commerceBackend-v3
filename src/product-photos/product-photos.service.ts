@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductPhotoDto } from './dto/create-product-photo.dto';
+import { UpdateProductPhotoDto } from './dto/update-product-photo.dto';
 
 @Injectable()
 export class ProductPhotosService {
@@ -39,6 +40,81 @@ export class ProductPhotosService {
     });
   }
 
+  async update(id: number, dto: UpdateProductPhotoDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const photo = await tx.productPhoto.findUnique({ where: { id } });
+      if (!photo) {
+        throw new NotFoundException('Product photo not found');
+      }
+
+      if (dto.order !== undefined && dto.order !== photo.order) {
+        const totalCount = await tx.productPhoto.count({
+          where: { productId: photo.productId },
+        });
+        const targetOrder = Math.min(Math.max(dto.order, 1), totalCount);
+
+        await tx.productPhoto.update({ where: { id }, data: { order: -1 } });
+
+        if (targetOrder > photo.order) {
+          const affected = await tx.productPhoto.findMany({
+            where: {
+              productId: photo.productId,
+              order: { gt: photo.order, lte: targetOrder },
+            },
+            orderBy: { order: 'asc' },
+          });
+          for (const p of affected) {
+            await tx.productPhoto.update({
+              where: { id: p.id },
+              data: { order: p.order - 1 },
+            });
+          }
+        } else {
+          const affected = await tx.productPhoto.findMany({
+            where: {
+              productId: photo.productId,
+              order: { gte: targetOrder, lt: photo.order },
+            },
+            orderBy: { order: 'desc' },
+          });
+          for (const p of affected) {
+            await tx.productPhoto.update({
+              where: { id: p.id },
+              data: { order: p.order + 1 },
+            });
+          }
+        }
+
+        await tx.productPhoto.update({
+          where: { id },
+          data: { order: targetOrder },
+        });
+      }
+
+      if (dto.isPrimary === true && !photo.isPrimary) {
+        await tx.productPhoto.updateMany({
+          where: { productId: photo.productId, isPrimary: true },
+          data: { isPrimary: false },
+        });
+        await tx.productPhoto.update({
+          where: { id },
+          data: { isPrimary: true },
+        });
+        await tx.product.update({
+          where: { id: photo.productId },
+          data: { primaryPhotoUrl: photo.url },
+        });
+      } else if (dto.isPrimary === false) {
+        await tx.productPhoto.update({
+          where: { id },
+          data: { isPrimary: false },
+        });
+      }
+
+      return tx.productPhoto.findUnique({ where: { id } });
+    });
+  }
+
   async remove(id: number) {
     await this.prisma.$transaction(async (tx) => {
       const photo = await tx.productPhoto.findUnique({ where: { id } });
@@ -48,10 +124,16 @@ export class ProductPhotosService {
 
       await tx.productPhoto.delete({ where: { id } });
 
-      await tx.productPhoto.updateMany({
+      const affected = await tx.productPhoto.findMany({
         where: { productId: photo.productId, order: { gt: photo.order } },
-        data: { order: { decrement: 1 } },
+        orderBy: { order: 'asc' },
       });
+      for (const p of affected) {
+        await tx.productPhoto.update({
+          where: { id: p.id },
+          data: { order: p.order - 1 },
+        });
+      }
 
       if (photo.isPrimary) {
         const nextPrimary = await tx.productPhoto.findFirst({
