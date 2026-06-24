@@ -33,6 +33,7 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
   comments     ProductComment[]
   refreshTokens RefreshToken[]
+  cartItems    CartItem[]
 
   @@map("users")
 }
@@ -78,6 +79,7 @@ model Product {
   updatedAt        DateTime @updatedAt @map("updated_at")
   photos           ProductPhoto[]
   comments         ProductComment[]
+  cartItems        CartItem[]
 
   @@map("products")
 }
@@ -95,6 +97,20 @@ model ProductPhoto {
 
   @@unique([productId, order])
   @@map("product_photos")
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, productId])
+  @@map("cart_items")
 }
 
 model ProductComment {
