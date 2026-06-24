@@ -1,10 +1,5 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '../../generated/prisma';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -40,18 +35,6 @@ export class CategoriesService {
 
   async remove(id: number) {
     await this.findById(id);
-    try {
-      await this.prisma.category.delete({ where: { id } });
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2003'
-      ) {
-        throw new ConflictException(
-          'Category cannot be deleted while products reference it',
-        );
-      }
-      throw error;
-    }
+    await this.prisma.category.delete({ where: { id } });
   }
 }
