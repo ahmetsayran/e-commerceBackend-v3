@@ -168,8 +168,18 @@ model ProductComment {
 }
 
 model Role {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  permissions RolePermission[]
 
   @@map("roles")
+}
+
+model RolePermission {
+  roleId        Int    @map("role_id")
+  permissionKey String @map("permission_key")
+  role          Role   @relation(fields: [roleId], references: [id])
+
+  @@id([roleId, permissionKey])
+  @@map("roles_permissions")
 }
