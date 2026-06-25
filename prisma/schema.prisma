@@ -45,6 +45,7 @@ model User {
   refreshTokens RefreshToken[]
   cartItems    CartItem[]
   orders       Order[]
+  userRoles    UserRole[]
 
   @@map("users")
 }
@@ -171,6 +172,7 @@ model Role {
   id          Int              @id @default(autoincrement())
   name        String           @unique
   permissions RolePermission[]
+  userRoles   UserRole[]
 
   @@map("roles")
 }
@@ -182,4 +184,14 @@ model RolePermission {
 
   @@id([roleId, permissionKey])
   @@map("roles_permissions")
+}
+
+model UserRole {
+  userId Int  @map("user_id")
+  roleId Int  @map("role_id")
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("users_roles")
 }
