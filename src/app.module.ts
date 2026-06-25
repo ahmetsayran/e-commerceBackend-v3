@@ -11,6 +11,7 @@ import { ProductPhotosModule } from './product-photos/product-photos.module';
 import { CommentsModule } from './comments/comments.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { OrdersModule } from './orders/orders.module';
     CommentsModule,
     CartItemsModule,
     OrdersModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
