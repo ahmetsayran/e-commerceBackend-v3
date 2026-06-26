@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { User } from '../../generated/prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 
 const PUBLIC_USER_SELECT = {
   id: true,
@@ -67,6 +68,34 @@ export class UsersService {
 
   findByUsername(username: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { username } });
+  }
+
+  findUserRoles(id: number) {
+    return this.prisma.userRole.findMany({
+      where: { userId: id },
+      include: { role: { include: { permissions: true } } },
+    });
+  }
+
+  async assignRole(id: number, dto: AssignRoleDto) {
+    await this.findById(id);
+    const role = await this.prisma.role.findUnique({
+      where: { id: dto.roleId },
+    });
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+    return this.prisma.userRole.create({
+      data: { userId: id, roleId: dto.roleId },
+      include: { role: true },
+    });
+  }
+
+  async removeRole(userId: number, roleId: number) {
+    await this.findById(userId);
+    await this.prisma.userRole.delete({
+      where: { userId_roleId: { userId, roleId } },
+    });
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<PublicUser> {
