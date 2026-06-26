@@ -70,6 +70,17 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
+  async findUserPermissions(id: number): Promise<string[]> {
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId: id },
+      include: { role: { include: { permissions: true } } },
+    });
+    const keys = userRoles.flatMap((ur) =>
+      ur.role.permissions.map((p) => p.permissionKey),
+    );
+    return [...new Set(keys)];
+  }
+
   findUserRoles(id: number) {
     return this.prisma.userRole.findMany({
       where: { userId: id },

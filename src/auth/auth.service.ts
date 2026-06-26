@@ -64,8 +64,9 @@ export class AuthService {
   }
 
   private async issueTokenPair(userId: number) {
+    const permissions = await this.usersService.findUserPermissions(userId);
     const accessToken = await this.jwtService.signAsync(
-      { sub: userId },
+      { sub: userId, permissions },
       {
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
         expiresIn: Number(
